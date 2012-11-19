@@ -9,6 +9,8 @@ import os
 class LaTeXDoc(object):
     """Represents a LaTeX document. Allows writing and compilation."""
 
+    ext = '.tex'
+
     def __init__(self, name):
         """Loading, writing, and typesetting are done by different methods.
 
@@ -19,7 +21,7 @@ class LaTeXDoc(object):
 
         """
         # Cheriton's NamedInterface: every entity has a name.
-        self._name = filename
+        self._name = name
         self._lines = []
 
     @property
@@ -45,18 +47,36 @@ class LaTeXDoc(object):
             Typeset the document as a .PDF.
 
         """
+        if len(path) == 0: path = '.'
         path = path if path[len(path)-1] == os.sep else path + os.sep
-        fid = open(path + filename, 'w')
+        fid = open(path + filename + self.ext, 'w')
         for line in self._lines:
-            fid.write(line)
+            fid.write(line + '\n')
         fid.close()
         if typeset_pdf: self.typeset(path, filename, 'pdf')
 
     def typeset(self, path, filename, outtype='pdf'):
-        """ TODO """
-        os.system('rubber --pdf {0}', path + filename)
+        """Typesets the document.
+
+        Parameters
+        ----------
+        path : str
+            The path where the output should be placed.
+        filename : str
+            The name of the file to typeset to.
+        outtype : str
+            A string identifying the type of file to typseset to.
+
+        """
+        if outtype == 'pdf':
+            os.system('rubber --pdf {0}'.format(path + filename + self.ext))
+        else:
+            raise Exception("Unsupported outtype.")
 
 
 class LaTeXArticle(object):
     """Represents a LaTeX document of class article."""
-    pass
+
+    def __init__(self, name):
+        raise Exception("TODO")
+

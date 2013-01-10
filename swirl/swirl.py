@@ -31,7 +31,7 @@ class LaTeXDoc(object):
         """Not implemented."""
         raise Exception("TODO")
 
-    def nextIs(self, line):
+    def next_is(self, line):
         self._lines += [line]
 
     def write(self, path, filename, typeset_pdf=False):
@@ -41,8 +41,9 @@ class LaTeXDoc(object):
         ----------
         path : str
             The path where the file is located.
-        filename : str
-            The name of the .TEX file, without the .TEX extension.
+        filename : str, optional
+            The name of the .TEX file, without the .TEX extension. Default is
+            the object's name (passed in by the constructor).
         typeset_pdf : boolean
             Typeset the document as a .PDF.
 
@@ -73,6 +74,39 @@ class LaTeXDoc(object):
         else:
             raise Exception("Unsupported outtype.")
 
+    def section(self, heading):
+        """Create a new section.
+
+        Parameter
+        ---------
+        heading : str
+            The name/heading of this new section.
+
+        """
+        self.next_is("\\section{%s}" % heading)
+
+    def subsection(self, heading):
+        """Create a new subsection.
+
+        Parameter
+        ---------
+        heading : str
+            The name/heading of this new subsection.
+
+        """
+        self.next_is("\\subsection{%s}" % heading)
+
+    def subsubsection(self, heading):
+        """Create a new subsubsection.
+
+        Parameter
+        ---------
+        heading : str
+            The name/heading of this new subsubsection.
+
+        """
+        self.next_is("\\subsubsection{%s}" % heading)
+
 
 class LaTeXArticle(object):
     """Represents a LaTeX document of class article."""
@@ -80,3 +114,79 @@ class LaTeXArticle(object):
     def __init__(self, name):
         raise Exception("TODO")
 
+
+class FigureReport(LaTeXDoc):
+    """A document whose contents is primarily multiple pgfplots. A generic
+    preamble is provided, and a simple plot method is provided."""
+
+    def __init__(self, name):
+        """Loading, writing, and typesetting are done by different methods.
+
+        Parameters
+        ----------
+        name : str
+            Name of the entity.
+
+        """
+        super(FigureReport, self).__init__(name)
+        self.next_is("""
+        \\documentclass[letterpaper]{article}
+        \\usepackage[left=1in,right=1in,top=1in,bottom=1in]{geometry}
+        \\usepackage{pgfplots}
+        \\usepackage{times}
+        """)
+
+    def front_matter(self, title, author):
+        """Adds title page and table of contents pages.
+
+        Parameters
+        ----------
+        title : str
+            Title of document.
+        author : str
+            List of authors.
+
+        """
+        self.next_is("""
+        \\begin{document}
+        \\title{%s}
+        \\author{%s}
+        \\date{\\today}
+        \\maketitle
+        \\newpage
+        \\tableofcontents
+        \\newpage
+        """ % (title, author))
+
+    def simple_data_plot(self, options, legend_entries, x, y):
+        """Creates a basic pgfplot in a tikzpicture. Any axis options can be
+        provided, and any number of series can be plotted.
+
+        Parameters
+        ----------
+        options : str
+            The options provided to the axis.
+        legend_entries : list of str's
+            The names of the series in the plot.
+        x : list of lists of floats
+            Independent variable for each series.
+        y : list of lists of floats
+            Dependent variable for each series.
+
+        """
+        self.next_is("\\begin{tikzpicture}")
+        self.next_is("\\begin{axis}[%s]" % options)
+        # All plots.
+        for i_series in range(len(x)):
+            self.next_is("\\addplot+[very thick] coordinates {")
+            for i_entry in range(len(x[i_series])):
+                self.next_is("({0}, {1})".format(
+                    x[i_series][i_entry], y[i_series][i_entry]))
+            self.next_is("};")
+        # Legend.
+        self.next_is("\\legend{%s" % legend_entries[0])
+        for i_entry in range(1, len(legend_entries)):
+            self.next_is(",{0}".format(legend_entries[i_entry]))
+        self.next_is("};")
+        self.next_is("\\end{axis}")
+        self.next_is("\\end{tikzpicture}")

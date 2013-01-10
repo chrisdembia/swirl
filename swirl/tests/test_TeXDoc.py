@@ -1,5 +1,7 @@
 """Tests LateXDoc."""
 
+# TODO test calling write() with filename using default argument.
+
 import os
 import unittest
 
@@ -16,10 +18,10 @@ class TestBasics(unittest.TestCase):
         """Tests initialization, writing, typesetting."""
 
         doc = swirl.LaTeXDoc('testdoc')
-        doc.nextIs('\\documentclass[letterpaper]{article}')
-        doc.nextIs('\\begin{document}')
-        doc.nextIs('Hello world!')
-        doc.nextIs('\\end{document}')
+        doc.next_is('\\documentclass[letterpaper]{article}')
+        doc.next_is('\\begin{document}')
+        doc.next_is('Hello world!')
+        doc.next_is('\\end{document}')
         doc.write('', doc.name)
         self.assertTrue(os.path.isfile(doc.name + '.tex'))
         self.assertEquals(open(doc.name + '.tex').readlines(),

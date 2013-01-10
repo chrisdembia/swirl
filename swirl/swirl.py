@@ -131,7 +131,7 @@ class FigureReport(LaTeXDoc):
         super(FigureReport, self).__init__(name)
         self.next_is("""
         \\documentclass[letterpaper]{article}
-        \\usepackage[left=1in,right=1in,top=1in,bottom=1in]{geometry}
+        \\usepackage[left=0.5in,right=0.5in,top=0.5in,bottom=0.5in]{geometry}
         \\usepackage{pgfplots}
         \\usepackage{times}
         """)
